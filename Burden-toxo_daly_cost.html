@@ -1213,11 +1213,11 @@ sa_daly1_pcc</code></pre>
 ## PTTMoth_fet      -0.004152229 1.891696e-01</code></pre>
 <pre class="r"><code>## tornado graph
 daly1_items &lt;-
-  c(&quot;Proportion of foetal loss&quot;,&quot;Proportion seropositive&quot;,
-    &quot;Proportion CNS&quot;,&quot;Proportion of neonatal deaths&quot;,
-    &quot;Proportion hydrocephalus&quot;,&quot;Proportion chorio 1&quot;,
-    &quot;Proportion seronegative&quot;,&quot;Proportion ICC&quot;,
-    &quot;Proportion chorio 2&quot;,&quot;Seroconversion rate&quot;)
+  c(&quot;Proportion of foetal loss&quot;, &quot;Proportion of seropositive&quot;,
+    &quot;Proportion of CNS abnormalities&quot;, &quot;Proportion of neonatal deaths&quot;,
+    &quot;Proportion of hydrocephalus&quot;, &quot;Proportion of chorio 1&quot;,
+    &quot;Proportion of seronegative&quot;, &quot;Proportion of ICC&quot;,
+    &quot;Proportion of chorio 2&quot;, &quot;Seroconversion rate&quot;)
 
 png(&quot;sa_daly1_pcc.png&quot;,  7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_daly1_pcc, daly1_items)
@@ -1272,11 +1272,8 @@ sa_daly2_pcc</code></pre>
 ## Chorio2           0.002432562  4.417537e-01</code></pre>
 <pre class="r"><code>## tornado graph
 daly2_items &lt;-
-  c(&quot;Proportion seropositive&quot;,&quot;Proportion CNS&quot;,&quot;Proportion of neonatal deaths&quot;,
-    &quot;Proportion hydrocephalus&quot;,&quot;Proportion chorio 1&quot;, &quot;Proportion ICC&quot;,
-    &quot;Proportion seronegative&quot;,&quot;Seroconversion rate&quot;, &quot;Proportion chorio 2&quot;)
+  c(&quot;Proportion of seropositive&quot;, &quot;Proportion of CNS abnormalities&quot;, &quot;Proportion of neonatal deaths&quot;, &quot;Proportion of hydrocephalus&quot;, &quot;Proportion of chorio 1&quot;, &quot;Proportion of ICC&quot;, &quot;Proportion of seronegative&quot;, &quot;Seroconversion rate&quot;, &quot;Proportion of chorio 2&quot;)
     
-
 png(&quot;sa_daly2_pcc.png&quot;,  7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_daly2_pcc, daly2_items)
 graphics.off()</code></pre>
@@ -1325,8 +1322,7 @@ sa_cost_pcc</code></pre>
 <pre class="r"><code>## tornado graph
 cost_items &lt;-
 c(&quot;Cost diagnostic&quot;, &quot;Cost consultation&quot;, &quot;Duration of treatment&quot;, 
-  &quot;Proportion of seropositive&quot;, &quot;Cost medicine&quot;, &quot;Number of hospital visits&quot;, 
-  &quot;Seroprevalence negative&quot;)
+  &quot;Proportion of seropositive&quot;, &quot;Cost medicine&quot;, &quot;Number of hospital visits&quot;, &quot;Seroprevalence negative&quot;)
 
 png(&quot;sa_cost_pcc.png&quot;, 7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_cost_pcc, cost_items)

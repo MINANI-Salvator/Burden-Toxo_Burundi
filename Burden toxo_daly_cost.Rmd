@@ -698,11 +698,11 @@ sa_daly1_pcc
 
 ## tornado graph
 daly1_items <-
-  c("Proportion of foetal loss","Proportion seropositive",
-    "Proportion CNS","Proportion of neonatal deaths",
-    "Proportion hydrocephalus","Proportion chorio 1",
-    "Proportion seronegative","Proportion ICC",
-    "Proportion chorio 2","Seroconversion rate")
+  c("Proportion of foetal loss", "Proportion of seropositive",
+    "Proportion of CNS abnormalities", "Proportion of neonatal deaths",
+    "Proportion of hydrocephalus", "Proportion of chorio 1",
+    "Proportion of seronegative", "Proportion of ICC",
+    "Proportion of chorio 2", "Seroconversion rate")
 
 png("sa_daly1_pcc.png",  7, 3.5, units = "in", res = 400)
 tornado(sa_daly1_pcc, daly1_items)
@@ -723,9 +723,7 @@ sa_daly2_pcc
 
 ## tornado graph
 daly2_items <-
-  c("Proportion seropositive","Proportion CNS","Proportion of neonatal deaths",
-    "Proportion hydrocephalus","Proportion chorio 1", "Proportion ICC",
-    "Proportion seronegative","Seroconversion rate", "Proportion chorio 2")
+  c("Proportion of seropositive", "Proportion of CNS abnormalities", "Proportion of neonatal deaths", "Proportion of hydrocephalus", "Proportion of chorio 1", "Proportion of ICC", "Proportion of seronegative", "Seroconversion rate", "Proportion of chorio 2")
     
 png("sa_daly2_pcc.png",  7, 3.5, units = "in", res = 400)
 tornado(sa_daly2_pcc, daly2_items)
@@ -747,8 +745,7 @@ sa_cost_pcc
 ## tornado graph
 cost_items <-
 c("Cost diagnostic", "Cost consultation", "Duration of treatment", 
-  "Proportion of seropositive", "Cost medicine", "Number of hospital visits", 
-  "Seroprevalence negative")
+  "Proportion of seropositive", "Cost medicine", "Number of hospital visits", "Seroprevalence negative")
 
 png("sa_cost_pcc.png", 7, 3.5, units = "in", res = 400)
 tornado(sa_cost_pcc, cost_items)
