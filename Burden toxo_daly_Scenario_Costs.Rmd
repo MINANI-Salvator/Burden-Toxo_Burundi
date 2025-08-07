@@ -1,0 +1,775 @@
+---
+title: "Burden of Congenital toxoplasmosis"
+author: "Salvator Minani"
+date: "2024-10-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### LOAD HELPER FUNCTIONS
+
+```{r}
+source("burden_toxo.R")
+```
+
+### SETTINGS
+## set seed to allow for reproducibility
+```{r}
+set.seed(264)
+```
+
+## number of iterations
+```{r}
+n <- 1e5
+```
+
+### PARAMETER VALUES FOR DALY
+## define population matrix
+```{r}
+pop_mx <-
+  matrix(c(893872, 1486390, 2459411, 470882, 218877,
+           888554, 1514133, 2568012, 481213, 234234),
+         ncol = 2)
+```
+
+### Number of Live births
+```{r}
+Live_births <- 437685
+```
+
+### Stillbirths after gestational week 22
+```{r}
+Still_births<- 7505
+```
+
+### Number of reported spontaneous abortions occurring up to 22 weeks of gestation
+```{r}
+Abortion <- 11616
+```
+
+### Total number of pregnancies
+```{r}
+Tot_Preg <- Live_births+Still_births+Abortion
+```
+
+### Probability of seronegative pregnant women, Beta parameters
+```{r}
+Pseroneg_alpha <- 3132
+Pseroneg_beta <- 4330-3132
+Pseroneg <-rbeta(n, Pseroneg_alpha, Pseroneg_beta)
+```
+
+### Probability of pregnant women getting infected during pregnancy, Beta parameters
+```{r}
+Pserop_alpha <-30
+Pserop_beta <-(3132-30)
+Pserop<- rbeta(n,Pserop_alpha, Pserop_beta)
+```
+
+### Total number of seroconverting pregnant women
+```{r}
+Nseroconv <-Tot_Preg*Pseroneg*Pserop
+```
+
+### Probability of trans-placental transmission-Mother-foetus
+```{r}
+PTTMoth_fet <- 0.281
+```
+
+### Probability of fetal loss in sero-converting mothers, uniform parameters
+```{r}
+P_fetalloss_min <- 0.017
+P_fetalloss_max <- 0.04
+P_fetalloss <-runif(n, P_fetalloss_min,P_fetalloss_max)
+```
+
+### Number of foetal losses due to CT > 22 weeks of gestation
+```{r}
+Nfetalloss<-Nseroconv*P_fetalloss*((40-22)/40)
+```
+
+### Incidence congenital toxoplasmosis
+```{r}
+ Inc_CT <-3132*Pserop*PTTMoth_fet
+```
+
+### Incidence of congenital toxoplasmosis cases per 1000 births
+```{r}
+Inc_CT_bi <-Inc_CT*(1000/3132)
+```
+
+### Total number of postnatal with CT
+```{r}
+Cases_CT <- ((Inc_CT_bi * Live_births)/1000)
+```
+
+### Proportion of pregnant women not taking Toxo medicine 
+```{r}
+PNtreat_toxo <-0.97
+```
+
+### Total number of postnatal with CT without health care
+```{r}
+Cases_CT_NHC <- Cases_CT*PNtreat_toxo
+```
+
+### DURATION OF TOXO SEQUELAE
+### Duration of toxo sequelae (life long, CNS, HYDRO, ICcalcification, chorioretinitis at birth)
+```{r}
+Duration_LE_Bi <-59.7
+```
+
+### Duration of chorioretinitis later in life
+```{r}
+Duration_later_Bi <-59.7-10
+```
+
+### Standard life expectancy-GBD 2019 for YLLs
+```{r}
+Duration_GBD <-88.87
+```
+
+### DISABILITY WEIGHTS
+## Disability Weight for patients with chorioretinitis-early
+```{r}
+DW_chorio1<-0.089
+```
+
+## Disability Weight for patients with chorioretinitis-later
+```{r}
+DW_chorio2<-0.089
+```
+
+## Disability Weight for patients with hydrocephalus
+```{r}
+DW_Hydro<-0.36
+```
+
+## Disability Weight for patients with intracranial calcifications
+```{r}
+DW_ICC<-0.01
+```
+
+## Disability Weight for patients with CNS abnormalities
+```{r}
+DW_CNSab<-0.36
+```
+
+## Disability weight for neonatal death
+```{r}
+DW_Neon<-1
+```
+
+### Disability weight for foetal loss
+```{r}
+DW_Floss<-1
+```
+
+#### DALY ESTIMATION PARAMETERS (no hospitals, DW and duration)
+## social weighting - select one of these
+
+```{r}
+K <- 0; r <- 0     # DALY[0;0]
+#K <- 0; r <- 0.03  # DALY[0;0.03]
+#K <- 1; r <- 0     # DALY[1;0]
+#K <- 1; r <- 0.03  # DALY[1;0.03]
+```
+
+### Proportion of neonates with chorioretinitis at birth, Beta parameters
+
+```{r}
+Chorio1_alpha<-141
+Chorio1_beta<-1048-141
+Chorio1<-rbeta(n, Chorio1_alpha,Chorio1_beta)
+```
+
+### Number of neonates with chorioretinitis at birth
+```{r}
+NT_Chorio1 <- Cases_CT_NHC*Chorio1
+```
+
+### YLD for untreated neonates with chorioretinitis at birth
+```{r}
+YLD_NT_Chorio1<-burden(NT_Chorio1, DW_chorio1, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Proportion of children with chorioretinitis later in life, fixed
+```{r}
+Chorio2<-0.16
+```
+
+### Number of children with chorioretinitis later in life
+```{r}
+NT_Chorio2 <- Cases_CT_NHC*Chorio2
+```
+
+### YLD for untreated children with chorioretinitis later in life
+```{r}
+YLD_NT_Chorio2<-burden(NT_Chorio2, DW_chorio2, A=10, L = Duration_later_Bi, K=K, r=r, a=10)
+```
+
+### Proportion of neonates with hydrocephalus, beta parameters
+```{r}
+Hydroc_alpha<-16
+Hydroc_beta<-856-16
+Hydrocephalus <- rbeta(n, Hydroc_alpha, Hydroc_beta)
+```
+
+### Number of neonates with hydrocephalus
+```{r}
+ NT_hydrocephalus<-Cases_CT_NHC*Hydrocephalus
+```
+
+### YLD for untreated neonates with hydrocephalus
+```{r}
+YLD_NT_hydrocephalus<-burden(NT_hydrocephalus, DW_Hydro, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Proportion of neonates with intracranial calcifications, beta parameters
+```{r}
+IC_Calc_alpha<-88
+IC_Calc_beta<-837-88
+IC_Calcification <-rbeta(n, IC_Calc_alpha, IC_Calc_beta)
+```
+
+### Number of neonates with intracranial calcification
+```{r}
+NT_IC_calcification <-Cases_CT_NHC*IC_Calcification
+```
+
+### YLD for untreated neonates with intracranial calcification
+```{r}
+YLD_NT_ICC<-burden(NT_IC_calcification, DW_ICC, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+#### Proportion of neonates with CNS abnormalities, Beta parameters
+```{r}
+CNS_alpha<-3
+CNS_beta<-105-3
+CNS_ab <-rbeta(n, CNS_alpha, CNS_beta)
+```
+### Total number of neonates with CNS abnormalities
+```{r}
+NT_CNS_abnorm <-Cases_CT_NHC*CNS_ab
+```
+
+### YLD for untreated neonates with CNS abnormalities
+```{r}
+YLD_NT_CNS<-burden(NT_CNS_abnorm, DW_CNSab, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Proportion of neonates that die, Beta parameters
+```{r}
+Neon_die_alpha<-9
+Neon_die_beta<-1211-9
+Neon_deaths<-rbeta(n, Neon_die_alpha, Neon_die_beta)
+```
+
+### Number of neonatal deaths
+```{r}
+NT_Neon_deaths<-Cases_CT_NHC*Neon_deaths
+```
+
+### YLL for untreated neonatal deaths
+```{r}
+YLL_NT_neo_death<-burden(NT_Neon_deaths, DW_Neon, A=0, L = Duration_GBD, K=K, r=r, a=0)
+```
+### YLL for foetal loss during pregnancy
+```{r}
+YLL_floss<-burden(Nfetalloss, DW_Floss, A=0, L = Duration_GBD, K=K, r=r, a=0)
+```
+
+### DALY PARAMETERS (HOSPITAL VISITS)
+
+### Proportion of pregnant women visiting major hospitals and treated
+```{r}
+PTreat_toxo <- 1-PNtreat_toxo
+```
+
+### Total number of postnatal with CT with treatment at  health care
+```{r}
+Cases_CT_treat_HC <- Cases_CT*PTreat_toxo
+```
+
+### Probability of treatment reducing congenital transmission, fixed 
+```{r}
+spiramycin_reduction <- 0.5
+```
+
+### Number of neonates with chorioretinitis from treated women 
+```{r}
+NTreat_Chorio1 <-Cases_CT_treat_HC*Chorio1*spiramycin_reduction
+```
+
+### YLL for neonates with chorioretinitis at birth from treated women
+```{r}
+YLD_Treat_chorio1<-burden(NTreat_Chorio1, DW_chorio1, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Number of neonates with chorioretinitis later in life from treated women
+```{r}
+ NTreat_Chorio2 <- Cases_CT_treat_HC*Chorio2*spiramycin_reduction
+```
+
+### YLD for neonates with chorioretinitis later in life from treated women
+```{r}
+YLD_Treat_chorio2 <-burden(NTreat_Chorio2, DW_chorio2, A=10, L = Duration_later_Bi, K=K, r=r, a=10)
+```
+
+### Number of neonates with hydrocephalus from women treated 
+```{r}
+NTreat_hydroc<-Cases_CT_treat_HC*Hydrocephalus*spiramycin_reduction
+```
+
+### YLD for neonates with hydrocephalus from women treated
+```{r}
+YLD_Treat_hydroc <-burden(NTreat_hydroc, DW_Hydro, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Number of neonates with intracranial calcification from treated women
+```{r}
+NTreat_IC_calc <-Cases_CT_treat_HC*IC_Calcification*spiramycin_reduction
+```
+
+### YLD for neonates with intracranial calcification from treated women
+```{r}
+YLD_Treat_ICC <-burden(NTreat_IC_calc, DW_ICC, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+### Number of neonates with CNS abnormalities from women treated 
+```{r}
+NTreat_CNS_ab <-Cases_CT_treat_HC*CNS_ab*spiramycin_reduction
+```
+
+### YLD for Number of neonates with CNS abnormalities from women treated
+```{r}
+YLD_Treat_CNS <-burden(NTreat_CNS_ab, DW_CNSab, A=0, L = Duration_LE_Bi, K=K, r=r, a=0)
+```
+
+#### Number of neonatal deaths from treated women
+```{r}
+NTreat_Neon_deaths<-Cases_CT_treat_HC*Neon_deaths*spiramycin_reduction
+```
+
+### YLL for neonatal deaths from treated women
+```{r}
+YLL_Treat_neo_death <-burden(NTreat_Neon_deaths, DW_Neon, A=0, L = Duration_GBD, K=K, r=r, a=0)
+```
+
+### DISABILITY ADJUSTED LIFE YEARS_Total
+### Years Lived with Disability, Untreated cases
+```{r}
+YLD_NT_all <- YLD_NT_Chorio1+YLD_NT_Chorio2+YLD_NT_hydrocephalus+YLD_NT_ICC+YLD_NT_CNS
+```
+
+### Years Lived with Disability, treated cases
+```{r}
+YLD_Treat_all <-YLD_Treat_chorio1+YLD_Treat_chorio2+YLD_Treat_hydroc+YLD_Treat_ICC+YLD_Treat_CNS
+```
+
+## Years Lived with Disability, total
+```{r}
+YLD_all <- YLD_NT_all+YLD_Treat_all
+```
+
+## Years of Life Lost due to Neonatal deaths and fetal loss
+```{r}
+## Scenario Including foetal loss in the YLL estimates
+YLL_all1<- YLL_NT_neo_death+YLL_Treat_neo_death+YLL_floss
+
+## Scenario excluding Foetal loss in the YLL estimates
+YLL_all2 <- YLL_NT_neo_death+YLL_Treat_neo_death
+```
+
+### Disability-Adjusted Life Years
+```{r}
+DALY1 <- YLD_all+YLL_all1
+## Without foetal loss in the estimates
+DALY2 <- YLD_all+YLL_all2
+```
+
+###
+### PARAMETERS FOR COSTS-ECONOMIC BURDEN
+### currency conversion factor, Burundian francs to US Dollar
+###
+
+```{r}
+bif2usd<- 1915
+```
+
+## Epidemiological paramters for costs
+```{r}
+### Proportion of pregnant women visiting health care
+PHC_toxo <-0.1
+
+### Proportion of seroconverting Women taking tretament
+HC_Women_treat <- 0.3
+
+### number of visits to hospital, Uniform parameters for suspected 
+n_visit_med_min <- 2
+n_visit_med_max <- 4
+n_visit_med <- runif(n, n_visit_med_min, n_visit_med_max)
+
+## cost of medical Consultation, gamma parameter
+Cconsult_day_shape <-3.31
+Cconsult_day_rate <- 0.000661
+Cconsultation <-rgamma(n, Cconsult_day_shape, Cconsult_day_rate)
+
+## price of medication by month, Fixed
+Cost_spiramycin_min<-270000
+Cost_spiramycin_max <-360000
+Cost_spiramycin <-runif(n, Cost_spiramycin_min, Cost_spiramycin_max)
+
+## price of diagnostic test, Gamma distribution
+Cost_diagnostic_shape<- 2.94
+Cost_diagnostic_rate<- 0.000196
+Cost_diagnostic<-rgamma(n, Cost_diagnostic_shape, Cost_diagnostic_rate)
+
+### Duration of treatment (months), uniform parameters
+Duration_treat_min<-2
+Duration_treat_max<-6
+Duration_treat <-runif(n, Duration_treat_min, Duration_treat_max)
+```
+
+### SIMULATIONS, HUMANS
+```{r}
+### Number of women consulting hospital for toxo (IgG+/- and IgM-) at least once
+N_women_Ntoxo<-Tot_Preg*PHC_toxo
+
+#### Women infected with toxoplasmosis visiting hospitals at least 3 times 
+N_Women_PToxo <-Nseroconv*PHC_toxo
+
+### Women positive for toxoplasmosis and treated
+N_women_treated <-N_Women_PToxo*HC_Women_treat
+```
+
+### COSTS, HUMANS
+##### Consultation and diagnostic
+```{r}
+### Cost_healthcare for women visiting hospital for toxo consultation and diagnosis
+Cost_Consult1 <-N_women_Ntoxo*Cconsultation
+Cost_dg1 <-N_women_Ntoxo*Cost_diagnostic
+Cost_Hcare1 <-Cost_Consult1+Cost_dg1
+
+### Costs for women infected with toxoplasmosis
+Cost_Consult2<-N_Women_PToxo*n_visit_med*Cconsultation
+Cost_dg2 <-N_Women_PToxo*n_visit_med*Cost_diagnostic
+Cost_Hcare2<- Cost_Consult2+Cost_dg2
+
+### Total costs for Consultation 
+Cost_tot_consult <-Cost_Consult1+Cost_Consult2
+
+### Total costs for diagnostic
+Cost_tot_dg <-Cost_dg1+Cost_dg2
+
+## Medication costs for women treated
+Cost_medicine <-N_women_treated*Cost_spiramycin*Duration_treat
+```
+
+### TOTAL COSTS AND CONVERSIONS
+```{r}
+cost_total <-Cost_tot_consult+Cost_tot_dg+Cost_medicine
+usd_cost_total <- cost_total / bif2usd
+usd_Cost_tot_consultation <- Cost_tot_consult/bif2usd
+usd_Cost_tot_diagnostic <-Cost_tot_dg/bif2usd
+usd_cost_medicine <- Cost_medicine/bif2usd
+usd_Cost_Hcare1 <-Cost_Hcare1/bif2usd
+usd_Cost_Hcare2<-Cost_Hcare2/bif2usd
+Usd_cost_by_NToxo<-(usd_Cost_Hcare1/(N_women_Ntoxo))
+Usd_cost_by_PToxo <-((usd_Cost_Hcare2+usd_cost_medicine)/N_Women_PToxo)
+Usd_cost_by_PToxo_treated <-((usd_cost_medicine+(usd_Cost_Hcare2*0.3))/N_women_treated)
+usd_cost_by_PToxo_untreated <-(usd_Cost_Hcare2/N_Women_PToxo)
+```
+
+
+
+
+### SUMMARIES
+```{r}
+Summary <-
+  function(x) {
+    print(c(mean = mean(x),
+            quantile(x, c(.025, .975))))
+  }
+```
+
+## cases, deaths 
+```{r}
+Summary(Inc_CT)
+Summary(Inc_CT_bi)
+Summary(Cases_CT)
+Summary(Cases_CT_NHC)
+Summary(Cases_CT_treat_HC)
+Summary(NT_Chorio1)
+Summary(NT_Chorio2)
+Summary(NT_hydrocephalus)
+Summary(NT_IC_calcification)
+Summary(NT_CNS_abnorm)
+Summary(NT_Neon_deaths)
+Summary (Nseroconv)
+Summary(Nfetalloss)
+```
+
+## Treated cases
+```{r}
+Summary(NTreat_Chorio1)
+Summary(NTreat_Chorio2)
+Summary(NTreat_hydroc)
+Summary(NTreat_IC_calc)
+Summary(NTreat_CNS_ab)
+Summary (NTreat_Neon_deaths)
+```
+
+## Total number of cases (treated + untreated)
+
+```{r}
+Summary (NT_Chorio1+NTreat_Chorio1)
+Summary (NT_Chorio2+NTreat_Chorio2)
+Summary (NT_hydrocephalus+NTreat_hydroc)
+Summary (NT_IC_calcification+NTreat_IC_calc)
+Summary (NT_CNS_abnorm+NTreat_CNS_ab)
+Summary (NT_Neon_deaths+NTreat_Neon_deaths)
+Summary((NT_Chorio1+NTreat_Chorio1)+(NT_Chorio2+NTreat_Chorio2)+(NT_hydrocephalus+NTreat_hydroc)+(NT_IC_calcification+NTreat_IC_calc)+(NT_CNS_abnorm+NTreat_CNS_ab))
+Summary (Cases_CT-((NT_Chorio1+NTreat_Chorio1)+(NT_Chorio2+NTreat_Chorio2)+(NT_hydrocephalus+NTreat_hydroc)+(NT_IC_calcification+NTreat_IC_calc)+(NT_CNS_abnorm+NTreat_CNS_ab)+(NT_Neon_deaths+NTreat_Neon_deaths)))
+```
+
+### YLDs untreated and treated
+```{r}
+Summary(YLD_NT_Chorio1)
+Summary (YLD_NT_Chorio2)
+Summary(YLD_NT_hydrocephalus)
+Summary(YLD_NT_ICC)
+Summary(YLD_NT_CNS)
+Summary(YLD_Treat_chorio1)
+Summary(YLD_Treat_chorio2)
+Summary(YLD_Treat_hydroc)
+Summary(YLD_Treat_ICC)
+Summary(YLD_Treat_CNS)
+Summary(YLD_NT_Chorio1+YLD_Treat_chorio1)
+Summary(YLD_NT_Chorio2+YLD_Treat_chorio2)
+Summary(YLD_NT_hydrocephalus+YLD_Treat_hydroc)
+Summary(YLD_NT_ICC+YLD_Treat_ICC)
+Summary(YLD_NT_CNS+YLD_Treat_CNS)
+Summary(YLD_NT_all)
+Summary(YLD_Treat_all)
+Summary(YLD_all)
+```
+
+## YLLs 
+```{r}
+Summary(YLL_floss)
+Summary(YLL_NT_neo_death)
+Summary(YLL_Treat_neo_death)
+Summary(YLL_NT_neo_death+YLL_Treat_neo_death)
+Summary(YLL_all1)
+Summary(YLL_all2)
+```
+
+### DALYs
+```{r}
+Summary(DALY1)
+Summary(DALY2)
+```
+
+### YLDs, YLLs, DALYs per 100000 population
+```{r}
+Summary(1e5 * YLD_all / sum(pop_mx))
+Summary(1e5 * YLL_all1 / sum(pop_mx))
+Summary(1e5 * YLL_all2 / sum(pop_mx))
+Summary(1e5 * DALY1 / sum(pop_mx))
+Summary(1e5 * DALY2 / sum(pop_mx))
+```
+
+## YLDs, YLLs, DALYs per incident case
+```{r}
+Summary(YLD_all / Cases_CT)
+Summary(YLL_all1 / Cases_CT)
+Summary(YLL_all2 / Cases_CT)
+Summary(DALY1 / Cases_CT)
+Summary(DALY2 / Cases_CT)
+```
+
+## YLD, YLL contribution
+```{r}
+Summary(YLL_all1 / DALY1)
+Summary(YLL_floss/DALY1)
+Summary((YLL_NT_neo_death+YLL_Treat_neo_death)/DALY1)
+Summary(YLL_all2 / DALY2)
+Summary(YLD_all / DALY1)
+Summary((YLD_NT_Chorio1+YLD_Treat_chorio1)/DALY1)
+Summary((YLD_NT_Chorio2+YLD_Treat_chorio2)/DALY1)
+Summary((YLD_NT_CNS+YLD_Treat_CNS)/DALY1)
+Summary((YLD_NT_hydrocephalus+YLD_Treat_hydroc)/DALY1)
+Summary((YLD_NT_ICC+YLD_Treat_ICC)/DALY1)
+Summary(YLD_all / DALY2)
+Summary((YLD_NT_Chorio1+YLD_Treat_chorio1)/DALY2)
+Summary((YLD_NT_Chorio2+YLD_Treat_chorio2)/DALY2)
+Summary((YLD_NT_CNS+YLD_Treat_CNS)/DALY2)
+Summary((YLD_NT_hydrocephalus+YLD_Treat_hydroc)/DALY2)
+Summary((YLD_NT_ICC+YLD_Treat_ICC)/DALY2)
+```
+
+### ECONOMIC COSTS
+### TOTAL COSTS_TOXOPLASMOSIS
+```{r}
+Summary(cost_total)
+Summary(usd_cost_total)
+Summary(usd_Cost_tot_consultation)
+Summary(usd_Cost_tot_diagnostic)
+Summary(usd_cost_medicine)
+Summary(Cost_tot_consult/ cost_total)
+Summary(Cost_tot_dg/ cost_total)
+Summary(Cost_medicine/ cost_total)
+Summary(usd_Cost_Hcare1)
+Summary(usd_Cost_Hcare2)
+Summary(Usd_cost_by_NToxo)
+Summary(Usd_cost_by_PToxo)
+Summary(Usd_cost_by_PToxo_treated)
+Summary(usd_cost_by_PToxo_untreated)
+```
+
+#### SENSITIVITY ANALYSES
+### SENSITIVITY ANALYSIS FUNCTIONS
+###
+
+```{r}
+## standardized regression coefficients
+sa_src <-
+function(y, x) {
+  df <- as.data.frame(apply(x, 2, scale))
+  summary(lm(scale(y) ~ ., data = df))
+}
+
+## partial correlation coefficients
+sa_pcc <-
+function(y, x) {
+  out <- matrix(ncol = 2, nrow = ncol(x))
+  colnames(out) <- c("rho", "p")
+  rownames(out) <- colnames(x)
+
+  for (i in seq(ncol(x))){
+    lm_y <- lm(y ~ x[, -i])      # regress y to other x's
+    lm_x <- lm(x[, i] ~ x[, -i]) # regress x to other x's
+    out[i, ] <-
+      unlist(cor.test(lm_y$residuals, lm_x$residuals)[4:3],
+             use.names = FALSE)
+  }
+
+  return(out[order(abs(out[, "rho"]), decreasing = TRUE), ])
+}
+```
+
+### TORNADO GRAPH
+```{r}
+## requires library ggplot2
+library(ggplot2)
+
+## ggplot2
+tornado <-
+function(coef, names = NULL) {
+  ## copy names if needed
+  if (is.null(names)) names <- rownames(coef)
+
+  ## create data frame
+  df <- data.frame(est = coef[, "rho"],
+                   order = order(abs(coef[, "rho"])),
+                   name = names)
+
+  ## sort data frame
+  df <- df[df$order, ]
+
+  ## create ggplot
+  ggplot(df, aes(x = order, y = est)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_x_continuous(element_blank(),
+                       breaks = seq(nrow(df)),
+                       labels = df$name) +
+    scale_y_continuous("partial correlation coefficient",
+                       limits = c(min(0, min(df$est) - 0.1),
+                                  max(0, max(df$est) + 0.1))) +
+    geom_text(aes(x = order, y = est, label = formatC(est, 3, form = "f")),
+              size = 3,
+              hjust = ifelse(df$est > 0, -0.1, 1.1),
+              vjust = 0.4) +
+    theme_bw()
+}
+```
+
+#### Sensitivity analysis for TOTAL DALYs including foetal loss
+
+```{r}
+sa_src(DALY1,
+       cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+
+sa_daly1_pcc <-
+  sa_pcc(DALY1,
+         cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
+               Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+sa_daly1_pcc
+
+## tornado graph
+daly1_items <-
+  c("Proportion of foetal loss", "Proportion of seropositive",
+    "Proportion of CNS abnormalities", "Proportion of neonatal deaths",
+    "Proportion of hydrocephalus", "Proportion of chorio 1",
+    "Proportion of seronegative", "Proportion of ICC",
+    "Proportion of chorio 2", "Seroconversion rate")
+
+png("sa_daly1_pcc.png",  7, 3.5, units = "in", res = 400)
+tornado(sa_daly1_pcc, daly1_items)
+graphics.off()
+```
+
+### Sensitivity for DALYS without foetal loss
+```{r}
+sa_src(DALY2,
+       cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet, 
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+
+sa_daly2_pcc <-
+  sa_pcc(DALY2,
+         cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet,
+               Chorio2, Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+sa_daly2_pcc
+
+## tornado graph
+daly2_items <-
+  c("Proportion of seropositive", "Proportion of CNS abnormalities", "Proportion of neonatal deaths", "Proportion of hydrocephalus", "Proportion of chorio 1", "Proportion of ICC", "Proportion of seronegative", "Seroconversion rate", "Proportion of chorio 2")
+    
+png("sa_daly2_pcc.png",  7, 3.5, units = "in", res = 400)
+tornado(sa_daly2_pcc, daly2_items)
+graphics.off()
+```
+
+
+#### SENSITIVITY ANALYSES_ECONOMIC LOSSES
+```{r}
+sa_src(usd_cost_total,
+       cbind(Pserop, Pseroneg, n_visit_med, 
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))
+sa_cost_pcc <-
+  sa_pcc(usd_cost_total,
+         cbind(Pserop, Pseroneg, n_visit_med, 
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))
+sa_cost_pcc
+
+## tornado graph
+cost_items <-
+c("Cost diagnostic", "Cost consultation", "Duration of treatment", 
+  "Proportion of seropositive", "Cost medicine", "Number of hospital visits", "Seroprevalence negative")
+
+png("sa_cost_pcc.png", 7, 3.5, units = "in", res = 400)
+tornado(sa_cost_pcc, cost_items)
+graphics.off()
+```
+
+
+
+
+
