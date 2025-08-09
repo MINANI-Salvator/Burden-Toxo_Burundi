@@ -791,8 +791,14 @@ Usd_cost_by_PToxo &lt;-((usd_Cost_Hcare2+usd_cost_medicine)/N_Women_PToxo)
 Usd_cost_by_PToxo_treated &lt;-((usd_cost_medicine+(usd_Cost_Hcare2*0.3))/N_women_treated)
 usd_cost_by_PToxo_untreated &lt;-(usd_Cost_Hcare2/N_Women_PToxo)</code></pre>
 </div>
+<div id="section-2" class="section level3">
+<h3></h3>
+</div>
 <div id="summaries" class="section level3">
 <h3>SUMMARIES</h3>
+</div>
+<div id="section-3" class="section level3">
+<h3></h3>
 <pre class="r"><code>Summary &lt;-
   function(x) {
     print(c(mean = mean(x),
@@ -1117,7 +1123,7 @@ usd_cost_by_PToxo_untreated &lt;-(usd_Cost_Hcare2/N_Women_PToxo)</code></pre>
 <div id="sensitivity-analysis-functions" class="section level3">
 <h3>SENSITIVITY ANALYSIS FUNCTIONS</h3>
 </div>
-<div id="section-2" class="section level3">
+<div id="section-4" class="section level3">
 <h3></h3>
 <pre class="r"><code>## standardized regression coefficients
 sa_src &lt;-
@@ -1183,7 +1189,7 @@ function(coef, names = NULL) {
 <h4>Sensitivity analysis for TOTAL DALYs including foetal loss</h4>
 <pre class="r"><code>sa_src(DALY1,
        cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
-             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))</code></pre>
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths,PNtreat_toxo))</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = scale(y) ~ ., data = df)
@@ -1192,7 +1198,7 @@ function(coef, names = NULL) {
 ##      Min       1Q   Median       3Q      Max 
 ## -0.92726 -0.04417 -0.00014  0.04383  1.04858 
 ## 
-## Coefficients: (2 not defined because of singularities)
+## Coefficients: (3 not defined because of singularities)
 ##                   Estimate Std. Error t value Pr(&gt;|t|)    
 ## (Intercept)      3.106e-16  3.398e-04    0.00        1    
 ## Pseroneg         2.009e-02  3.399e-04   59.12   &lt;2e-16 ***
@@ -1205,6 +1211,7 @@ function(coef, names = NULL) {
 ## IC_Calcification 4.529e-03  3.398e-04   13.33   &lt;2e-16 ***
 ## CNS_ab           2.427e-01  3.398e-04  714.25   &lt;2e-16 ***
 ## Neon_deaths      1.541e-01  3.398e-04  453.58   &lt;2e-16 ***
+## PNtreat_toxo            NA         NA      NA       NA    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -1214,7 +1221,7 @@ function(coef, names = NULL) {
 <pre class="r"><code>sa_daly1_pcc &lt;-
   sa_pcc(DALY1,
          cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
-               Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+               Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo, PTreat_toxo))
 sa_daly1_pcc</code></pre>
 <pre><code>##                           rho            p
 ## Pserop            0.991066342 0.000000e+00
@@ -1225,15 +1232,15 @@ sa_daly1_pcc</code></pre>
 ## Chorio1           0.344640954 0.000000e+00
 ## Pseroneg          0.183788067 0.000000e+00
 ## IC_Calcification  0.042104342 1.763926e-40
+## PNtreat_toxo     -0.004152229 1.891696e-01
 ## PTTMoth_fet      -0.004152229 1.891696e-01
-## Chorio2           0.004152229 1.891696e-01</code></pre>
+## Chorio2           0.004152229 1.891696e-01
+## PTreat_toxo       0.004152229 1.891696e-01</code></pre>
 <pre class="r"><code>## tornado graph
 daly1_items &lt;-
-  c(&quot;Proportion of foetal loss&quot;, &quot;Proportion of seropositive&quot;,
-    &quot;Proportion of CNS abnormalities&quot;, &quot;Proportion of neonatal deaths&quot;,
+  c(&quot;Proportion of seropositive&quot;,&quot;Proportion of foetal loss&quot;, &quot;Proportion of neonatal deaths&quot;, &quot;Proportion of CNS abnormalities&quot;, 
     &quot;Proportion of hydrocephalus&quot;, &quot;Proportion of chorio 1&quot;,
-    &quot;Proportion of seronegative&quot;, &quot;Proportion of ICC&quot;,
-    &quot;Proportion of chorio 2&quot;, &quot;Seroconversion rate&quot;)
+    &quot;Proportion of seronegative&quot;, &quot;Proportion of ICC&quot;, &quot;Proportion of women treated&quot;,&quot;Seroconversion rate&quot;, &quot;Proportion of chorio 2&quot;, &quot;Proportion of women untreated&quot;)
 
 png(&quot;sa_daly1_pcc.png&quot;,  7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_daly1_pcc, daly1_items)
@@ -1244,7 +1251,7 @@ graphics.off()</code></pre>
 <h3>Sensitivity for DALYS without foetal loss</h3>
 <pre class="r"><code>sa_src(DALY2,
        cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet, 
-             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))</code></pre>
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo))</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = scale(y) ~ ., data = df)
@@ -1253,7 +1260,7 @@ graphics.off()</code></pre>
 ##      Min       1Q   Median       3Q      Max 
 ## -1.29830 -0.03856  0.00042  0.03935  1.39205 
 ## 
-## Coefficients: (2 not defined because of singularities)
+## Coefficients: (3 not defined because of singularities)
 ##                    Estimate Std. Error  t value Pr(&gt;|t|)    
 ## (Intercept)       3.126e-16  3.399e-04    0.000     1.00    
 ## Pseroneg         -4.264e-04  3.399e-04   -1.255     0.21    
@@ -1265,6 +1272,7 @@ graphics.off()</code></pre>
 ## IC_Calcification  8.641e-03  3.399e-04   25.425   &lt;2e-16 ***
 ## CNS_ab            4.818e-01  3.399e-04 1417.504   &lt;2e-16 ***
 ## Neon_deaths       3.064e-01  3.399e-04  901.605   &lt;2e-16 ***
+## PNtreat_toxo             NA         NA       NA       NA    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -1274,7 +1282,7 @@ graphics.off()</code></pre>
 <pre class="r"><code>sa_daly2_pcc &lt;-
   sa_pcc(DALY2,
          cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet,
-               Chorio2, Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+               Chorio2, Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo, PTreat_toxo))
 sa_daly2_pcc</code></pre>
 <pre><code>##                           rho             p
 ## Pserop            0.991072427  0.000000e+00
@@ -1285,19 +1293,22 @@ sa_daly2_pcc</code></pre>
 ## IC_Calcification  0.080145389 3.719483e-142
 ## Pseroneg         -0.003967513  2.096142e-01
 ## PTTMoth_fet      -0.002432562  4.417537e-01
-## Chorio2           0.002432562  4.417537e-01</code></pre>
+## PNtreat_toxo     -0.002432562  4.417537e-01
+## Chorio2           0.002432562  4.417537e-01
+## PTreat_toxo       0.002432562  4.417537e-01</code></pre>
 <pre class="r"><code>## tornado graph
 daly2_items &lt;-
-  c(&quot;Proportion of seropositive&quot;, &quot;Proportion of CNS abnormalities&quot;, &quot;Proportion of neonatal deaths&quot;, &quot;Proportion of hydrocephalus&quot;, &quot;Proportion of chorio 1&quot;, &quot;Proportion of ICC&quot;, &quot;Proportion of seronegative&quot;, &quot;Seroconversion rate&quot;, &quot;Proportion of chorio 2&quot;)
+  c(&quot;Proportion of seropositive&quot;, &quot;Proportion of neonatal deaths&quot;, &quot;Proportion of CNS abnormalities&quot;,  &quot;Proportion of hydrocephalus&quot;, &quot;Proportion of chorio 1&quot;, &quot;Proportion of ICC&quot;, &quot;Proportion of women treated&quot;, &quot;Proportion of women untreated&quot;, &quot;Seroconversion rate&quot;, &quot;Proportion of chorio 2&quot;, &quot;Proportion of seronegative&quot;)
     
 png(&quot;sa_daly2_pcc.png&quot;,  7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_daly2_pcc, daly2_items)
 graphics.off()</code></pre>
-<div id="sensitivity-analyses_economic-losses" class="section level4">
-<h4>SENSITIVITY ANALYSES_ECONOMIC LOSSES</h4>
+</div>
+<div id="sensitivity-analyses_economic-losses" class="section level3">
+<h3>SENSITIVITY ANALYSES_ECONOMIC LOSSES</h3>
 <pre class="r"><code>sa_src(usd_cost_total,
        cbind(Pserop, Pseroneg, n_visit_med, 
-             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))</code></pre>
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat, HC_Women_treat, PHC_toxo))</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = scale(y) ~ ., data = df)
@@ -1306,7 +1317,7 @@ graphics.off()</code></pre>
 ##       Min        1Q    Median        3Q       Max 
 ## -0.125847 -0.008941 -0.001049  0.007856  0.160544 
 ## 
-## Coefficients:
+## Coefficients: (2 not defined because of singularities)
 ##                  Estimate Std. Error  t value Pr(&gt;|t|)    
 ## (Intercept)     1.703e-16  5.589e-05     0.00        1    
 ## Pserop          5.872e-02  5.589e-05  1050.58   &lt;2e-16 ***
@@ -1316,6 +1327,8 @@ graphics.off()</code></pre>
 ## Cost_diagnostic 9.476e-01  5.589e-05 16954.55   &lt;2e-16 ***
 ## Cost_spiramycin 2.312e-02  5.589e-05   413.69   &lt;2e-16 ***
 ## Duration_treat  8.072e-02  5.589e-05  1444.21   &lt;2e-16 ***
+## HC_Women_treat         NA         NA       NA       NA    
+## PHC_toxo               NA         NA       NA       NA    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -1325,25 +1338,26 @@ graphics.off()</code></pre>
 <pre class="r"><code>sa_cost_pcc &lt;-
   sa_pcc(usd_cost_total,
          cbind(Pserop, Pseroneg, n_visit_med, 
-             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat, HC_Women_treat, PHC_toxo))
 sa_cost_pcc</code></pre>
-<pre><code>##                       rho p
-## Cost_diagnostic 0.9998261 0
-## Cconsultation   0.9982610 0
-## Duration_treat  0.9768585 0
-## Pserop          0.9575646 0
-## Cost_spiramycin 0.7944839 0
-## n_visit_med     0.4335133 0
-## Pseroneg        0.1681488 0</code></pre>
+<pre><code>##                          rho         p
+## Cost_diagnostic  0.999826120 0.0000000
+## Cconsultation    0.998261014 0.0000000
+## Duration_treat   0.976858514 0.0000000
+## Pserop           0.957564614 0.0000000
+## Cost_spiramycin  0.794483920 0.0000000
+## n_visit_med      0.433513278 0.0000000
+## Pseroneg         0.168148843 0.0000000
+## PHC_toxo        -0.004117747 0.1928702
+## HC_Women_treat   0.004117747 0.1928702</code></pre>
 <pre class="r"><code>## tornado graph
 cost_items &lt;-
 c(&quot;Cost diagnostic&quot;, &quot;Cost consultation&quot;, &quot;Duration of treatment&quot;, 
-  &quot;Proportion of seropositive&quot;, &quot;Cost medicine&quot;, &quot;Number of hospital visits&quot;, &quot;Seroprevalence negative&quot;)
+   &quot;Cost medicine&quot;, &quot;Number of hospital visits&quot;, &quot;Proportion of women treated&quot;, &quot;Proportion of women visiting hospitals&quot;, &quot;Seroprevalence negative&quot;,&quot;Proportion of seropositive&quot;)
 
 png(&quot;sa_cost_pcc.png&quot;, 7, 3.5, units = &quot;in&quot;, res = 400)
 tornado(sa_cost_pcc, cost_items)
 graphics.off()</code></pre>
-</div>
 </div>
 </div>
 

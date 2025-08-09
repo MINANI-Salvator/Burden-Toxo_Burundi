@@ -485,10 +485,10 @@ Usd_cost_by_PToxo_treated <-((usd_cost_medicine+(usd_Cost_Hcare2*0.3))/N_women_t
 usd_cost_by_PToxo_untreated <-(usd_Cost_Hcare2/N_Women_PToxo)
 ```
 
-
-
-
+###
 ### SUMMARIES
+###
+
 ```{r}
 Summary <-
   function(x) {
@@ -705,21 +705,18 @@ function(coef, names = NULL) {
 ```{r}
 sa_src(DALY1,
        cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
-             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths,PNtreat_toxo))
 
 sa_daly1_pcc <-
   sa_pcc(DALY1,
          cbind(Pseroneg, Pserop, PTTMoth_fet, P_fetalloss, Chorio1, 
-               Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+               Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo, PTreat_toxo))
 sa_daly1_pcc
-
 ## tornado graph
 daly1_items <-
-  c("Proportion of foetal loss", "Proportion of seropositive",
-    "Proportion of CNS abnormalities", "Proportion of neonatal deaths",
+  c("Proportion of seropositive","Proportion of foetal loss", "Proportion of neonatal deaths", "Proportion of CNS abnormalities", 
     "Proportion of hydrocephalus", "Proportion of chorio 1",
-    "Proportion of seronegative", "Proportion of ICC",
-    "Proportion of chorio 2", "Seroconversion rate")
+    "Proportion of seronegative", "Proportion of ICC", "Proportion of women treated","Seroconversion rate", "Proportion of chorio 2", "Proportion of women untreated")
 
 png("sa_daly1_pcc.png",  7, 3.5, units = "in", res = 400)
 tornado(sa_daly1_pcc, daly1_items)
@@ -730,17 +727,17 @@ graphics.off()
 ```{r}
 sa_src(DALY2,
        cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet, 
-             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+             Chorio2,Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo))
 
 sa_daly2_pcc <-
   sa_pcc(DALY2,
          cbind(Pseroneg, Pserop, Chorio1, PTTMoth_fet,
-               Chorio2, Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths))
+               Chorio2, Hydrocephalus,IC_Calcification, CNS_ab, Neon_deaths, PNtreat_toxo, PTreat_toxo))
 sa_daly2_pcc
 
 ## tornado graph
 daly2_items <-
-  c("Proportion of seropositive", "Proportion of CNS abnormalities", "Proportion of neonatal deaths", "Proportion of hydrocephalus", "Proportion of chorio 1", "Proportion of ICC", "Proportion of seronegative", "Seroconversion rate", "Proportion of chorio 2")
+  c("Proportion of seropositive", "Proportion of neonatal deaths", "Proportion of CNS abnormalities",  "Proportion of hydrocephalus", "Proportion of chorio 1", "Proportion of ICC", "Proportion of women treated", "Proportion of women untreated", "Seroconversion rate", "Proportion of chorio 2", "Proportion of seronegative")
     
 png("sa_daly2_pcc.png",  7, 3.5, units = "in", res = 400)
 tornado(sa_daly2_pcc, daly2_items)
@@ -748,21 +745,21 @@ graphics.off()
 ```
 
 
-#### SENSITIVITY ANALYSES_ECONOMIC LOSSES
+### SENSITIVITY ANALYSES_ECONOMIC LOSSES
+
 ```{r}
 sa_src(usd_cost_total,
        cbind(Pserop, Pseroneg, n_visit_med, 
-             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat, HC_Women_treat))
 sa_cost_pcc <-
   sa_pcc(usd_cost_total,
          cbind(Pserop, Pseroneg, n_visit_med, 
-             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat))
+             Cconsultation, Cost_diagnostic, Cost_spiramycin, Duration_treat, HC_Women_treat))
 sa_cost_pcc
 
 ## tornado graph
 cost_items <-
-c("Cost diagnostic", "Cost consultation", "Duration of treatment", 
-  "Proportion of seropositive", "Cost medicine", "Number of hospital visits", "Seroprevalence negative")
+c("Cost diagnostic", "Cost consultation", "Duration of treatment", "Cost medicine", "Number of hospital visits", "Proportion of women treated", "Seroprevalence negative","Proportion of seropositive")
 
 png("sa_cost_pcc.png", 7, 3.5, units = "in", res = 400)
 tornado(sa_cost_pcc, cost_items)
